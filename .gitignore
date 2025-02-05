@@ -1,0 +1,13 @@
+# Ignore generated files
+src/generated
+
+# Protofile
+proto
+
+# Node modules
+node_modules
+
+# env
+.env
+
+auth
