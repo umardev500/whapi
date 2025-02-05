@@ -1,8 +1,7 @@
+import * as dotenvx from "@dotenvx/dotenvx";
+import * as grpc from "@grpc/grpc-js";
 import { WhatsAppServiceClient } from "./generated/wa_grpc_pb";
 import { startWaService } from "./wa-service";
-import * as grpc from "@grpc/grpc-js";
-import * as dotenvx from "@dotenvx/dotenvx";
-import { MessageRequest } from "./generated/wa_pb";
 
 // Load .env file
 dotenvx.config();
