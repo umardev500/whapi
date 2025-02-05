@@ -28,7 +28,13 @@ export const parseMessage = async (
   if (message.imageMessage) {
     await handleMediaMessage(client, msg, message, metadata);
   } else if (message.conversation) {
-    handleTextMessage(client, message.conversation, metadata);
+    handleTextMessage(
+      client,
+      message.conversation,
+      metadata,
+      msg.pushName!,
+      msg.messageTimestamp!
+    );
   } else if (message.extendedTextMessage) {
     handleExtendedTextMessage(client, message.extendedTextMessage, metadata);
   }
@@ -64,11 +70,15 @@ const handleMediaMessage = async (
 const handleTextMessage = (
   client: WhatsAppServiceClient,
   text: string,
-  metadata: MessageMetadata
+  metadata: MessageMetadata,
+  pushName: string,
+  timestamp: number | Long
 ) => {
   const msgRequest = new TextMessageRequest();
   msgRequest.setConversation(text);
   msgRequest.setMetadata(metadata);
+  msgRequest.setPushname(pushName);
+  msgRequest.setTimestamp(Number(timestamp));
 
   client.sendTextMessage(msgRequest, (err, response) => {
     if (err) {
@@ -132,7 +142,6 @@ const createFileMetadata = (
   metadata.setMetadata(meta);
   metadata.setCaption(new StringValue().setValue(mediaMsg?.caption ?? ""));
   metadata.setFilename(media.fileName);
-  metadata.setFilepath(media.filePath);
   metadata.setContextinfo(ctxInfoInstance);
   return metadata;
 };
@@ -151,6 +160,7 @@ const createQuotedMessage = (
     );
   } else if (quotedMessage.imageMessage) {
     const imgMessageInstance = new ImageMessage();
+    imgMessageInstance.setMimetype(quotedMessage.imageMessage.mimetype!);
     imgMessageInstance.setCaption(
       new StringValue().setValue(quotedMessage.imageMessage.caption!)
     );
@@ -175,9 +185,6 @@ const processMedia = async (
 
   if (!mediaMsg) return null;
 
-  const mimeType = mediaMsg.mimetype ?? "";
-  const fileExtension = mimeType.split("/")[1] || "bin"; // Extract extension (e.g., jpeg -> jpg)
-  const fileName = `./media/${Date.now()}.${fileExtension}`;
   const caption = "caption" in mediaMsg ? mediaMsg.caption : null;
 
   try {
@@ -191,8 +198,7 @@ const processMedia = async (
         }
 
         resolve({
-          fileName,
-          filePath: resp.toObject().fileurl,
+          fileName: resp.toObject().filepath,
           caption,
           contextInfo: mediaMsg.contextInfo,
         });
