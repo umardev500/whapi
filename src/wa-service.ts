@@ -3,14 +3,30 @@ import makeWASocket, {
   DisconnectReason,
   downloadMediaMessage,
   useMultiFileAuthState,
+  WASocket,
 } from "baileys";
 import { parseMessage } from "./parse-message";
 import { WhatsAppServiceClient } from "./generated/wa_grpc_pb";
 
+let sock: WASocket | null = null;
+let subscribedList: string[] = [];
+
+export const subscribe = async (jid: string) => {
+  if (!sock) {
+    console.log("no sock");
+    return;
+  }
+
+  if (!subscribedList.includes(jid)) {
+    await sock.presenceSubscribe(jid);
+    subscribedList.push(jid);
+  }
+};
+
 export const startWaService = async (client: WhatsAppServiceClient) => {
   const { state, saveCreds } = await useMultiFileAuthState("./auth");
 
-  const sock = makeWASocket({
+  sock = makeWASocket({
     auth: state,
     printQRInTerminal: true,
   });
@@ -36,5 +52,9 @@ export const startWaService = async (client: WhatsAppServiceClient) => {
   sock.ev.on("messages.upsert", (upsert) => {
     const msg = upsert.messages[0];
     parseMessage(client, msg);
+  });
+
+  sock.ev.on("presence.update", (presence) => {
+    console.log("presence update", presence);
   });
 };
