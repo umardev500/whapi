@@ -3,6 +3,7 @@ import * as grpc from "@grpc/grpc-js";
 import { WhatsAppServiceClient } from "./generated/wa_grpc_pb";
 import { startWaService, subscribe } from "./wa-service";
 import { MessageType } from "./types/constants";
+import { StreamResponse } from "./types/message-types";
 
 // Load .env file
 dotenvx.config();
@@ -20,14 +21,14 @@ const stream = client.streamMessage();
 
 // Listen for incoming messages from the server
 stream.on("data", (response) => {
-  if (response.u && Array.isArray(response.u)) {
-    const mt = response.u[0];
+  const streamResp = response.toObject() as StreamResponse;
 
-    for (const msg of response.u.slice(1)) {
+  if (response.u && Array.isArray(response.u)) {
+    const mt = streamResp.mt;
+
+    for (const jid of streamResp.jidList) {
       if (mt === MessageType.STATUS) {
-        for (const jid of msg) {
-          subscribe(jid);
-        }
+        subscribe(jid);
       }
     }
   }

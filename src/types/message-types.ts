@@ -5,3 +5,8 @@ export interface MediaResponse {
   caption?: string | null;
   contextInfo?: proto.IContextInfo | null;
 }
+
+export type StreamResponse = {
+  mt: string;
+  jidList: string[];
+};
