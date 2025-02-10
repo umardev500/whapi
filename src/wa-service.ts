@@ -7,6 +7,7 @@ import makeWASocket, {
 import { WhatsAppServiceClient } from "./generated/wa_grpc_pb";
 import { SendOnlineUserRequest } from "./generated/wa_pb";
 import { parseMessage } from "./parse-message";
+import { parsePresence } from "./presence";
 
 let sock: WASocket | null = null;
 let subscribedList: string[] = [];
@@ -58,20 +59,7 @@ export const startWaService = async (client: WhatsAppServiceClient) => {
   sock.ev.on("presence.update", (presence) => {
     const { id, presences } = presence;
     const [_, presenceData] = Object.entries(presences)[0] || [];
-    console.log(id, presenceData);
 
-    if ("lastSeen" in presenceData) {
-      const onlineUser = new SendOnlineUserRequest();
-      onlineUser.setJid(id);
-      onlineUser.setPresence(presenceData.lastKnownPresence);
-      onlineUser.setLastseen(presenceData.lastSeen ?? 0);
-      client.sendOnlineUser(onlineUser, (err, response) => {
-        if (err) {
-          console.log("❌ Failed to send online user:", err);
-        } else {
-          console.log("✅ Online user sent:", response.toObject());
-        }
-      });
-    }
+    parsePresence(client, id, presenceData);
   });
 };
