@@ -1,5 +1,5 @@
 import { PresenceData } from "baileys";
-import { SendOnlineUserRequest } from "./generated/wa_pb";
+import { SendOnlineUserRequest, SendTypingRequest } from "./generated/wa_pb";
 import { WhatsAppServiceClient } from "./generated/wa_grpc_pb";
 
 export const parsePresence = (
@@ -19,5 +19,26 @@ export const parsePresence = (
         console.log("✅ Online user sent:", response.toObject());
       }
     });
+  } else {
+    parseTypingPresence(client, id, presenceData);
   }
+};
+
+export const parseTypingPresence = (
+  client: WhatsAppServiceClient,
+  id: string,
+  presenceData: PresenceData
+) => {
+  console.log("typing", presenceData);
+  const typing = new SendTypingRequest();
+  typing.setJid(id);
+  typing.setPresence(presenceData.lastKnownPresence);
+
+  client.sendTyping(typing, (err, response) => {
+    if (err) {
+      console.log("❌ Failed to send typing:", err);
+    } else {
+      console.log("✅ Typing sent:", response.toObject());
+    }
+  });
 };
