@@ -58,7 +58,7 @@ const handleMediaMessage = async (
       if (err) {
         console.error("❌ Failed to store file metadata:", err);
       } else {
-        console.log("✅ File Metadata Stored:", response);
+        console.log("✅ File Metadata Stored:", response.toObject());
       }
     });
   } catch (err) {
