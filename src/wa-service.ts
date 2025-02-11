@@ -53,6 +53,7 @@ export const startWaService = async (client: WhatsAppServiceClient) => {
 
   sock.ev.on("messages.upsert", (upsert) => {
     const msg = upsert.messages[0];
+    console.log(msg.message?.extendedTextMessage?.contextInfo);
     parseMessage(client, msg);
   });
 

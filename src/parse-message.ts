@@ -36,7 +36,13 @@ export const parseMessage = async (
       msg.messageTimestamp!
     );
   } else if (message.extendedTextMessage) {
-    handleExtendedTextMessage(client, message.extendedTextMessage, metadata);
+    handleExtendedTextMessage(
+      client,
+      message.extendedTextMessage,
+      metadata,
+      msg.pushName!,
+      msg.messageTimestamp!
+    );
   }
 };
 
@@ -84,7 +90,7 @@ const handleTextMessage = (
     if (err) {
       console.error("❌ Failed to send message:", err);
     } else {
-      console.log("✅ Message Sent:", response);
+      console.log("✅ Message Sent:", response.toObject());
     }
   });
 
@@ -95,7 +101,9 @@ const handleTextMessage = (
 const handleExtendedTextMessage = (
   client: WhatsAppServiceClient,
   extendedMessage: proto.Message.IExtendedTextMessage,
-  metadata: MessageMetadata
+  metadata: MessageMetadata,
+  pushName: string,
+  timestamp: number | Long
 ) => {
   const { text, contextInfo } = extendedMessage;
   if (!text || !contextInfo) return;
@@ -103,6 +111,8 @@ const handleExtendedTextMessage = (
   const extendedMsgRequest = new ExtendedTextMessageRequest();
   extendedMsgRequest.setMetadata(metadata);
   extendedMsgRequest.setText(text);
+  extendedMsgRequest.setPushname(pushName);
+  extendedMsgRequest.setTimestamp(Number(timestamp));
 
   const ctxInfoInstance = new ContextInfo();
   ctxInfoInstance.setStanzaid(contextInfo.stanzaId!);
@@ -116,7 +126,7 @@ const handleExtendedTextMessage = (
     if (err) {
       console.error("❌ Failed to send extended text message:", err);
     } else {
-      console.log("✅ Extended Message Sent:", response);
+      console.log("✅ Extended Message Sent:", response.toObject());
     }
   });
 

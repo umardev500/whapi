@@ -29,7 +29,6 @@ export const parseTypingPresence = (
   id: string,
   presenceData: PresenceData
 ) => {
-  console.log("typing", presenceData);
   const typing = new SendTypingRequest();
   typing.setJid(id);
   typing.setPresence(presenceData.lastKnownPresence);
