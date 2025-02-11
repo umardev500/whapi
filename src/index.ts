@@ -17,19 +17,17 @@ const client = new WhatsAppServiceClient(
 );
 
 // Open a stream
-const stream = client.streamMessage();
+const stream = client.subscribePresense();
 
 // Listen for incoming messages from the server
 stream.on("data", (response) => {
   const streamResp = response.toObject() as StreamResponse;
 
-  if (response.u && Array.isArray(response.u)) {
-    const mt = streamResp.mt;
+  const mt = streamResp.mt;
 
-    for (const jid of streamResp.jidList) {
-      if (mt === MessageType.STATUS) {
-        subscribe(jid);
-      }
+  for (const jid of streamResp.jidList) {
+    if (mt === MessageType.STATUS) {
+      subscribe(jid);
     }
   }
 });
