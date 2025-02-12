@@ -1,6 +1,7 @@
 import { Boom } from "@hapi/boom";
 import makeWASocket, {
   DisconnectReason,
+  downloadEncryptedContent,
   useMultiFileAuthState,
   WASocket,
 } from "baileys";
@@ -26,6 +27,27 @@ export const subscribe = async (jid: string, reconnect = false) => {
   if (!subscribedList.includes(jid)) {
     await sock.presenceSubscribe(jid);
     subscribedList.push(jid);
+  }
+};
+
+export const getProfilePicUrl = async (
+  jid: string,
+  type: "image" | "preview" = "preview"
+): Promise<string | null> => {
+  if (!sock) {
+    // throw new error
+    throw new Error("No sock");
+  }
+
+  try {
+    const ppUrl = await sock!.profilePictureUrl(jid, type);
+    if (!ppUrl) {
+      console.log("No profile picture available.");
+      return null;
+    }
+    return ppUrl;
+  } catch (error) {
+    throw error;
   }
 };
 

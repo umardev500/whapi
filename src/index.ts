@@ -4,6 +4,7 @@ import { WhatsAppServiceClient } from "./generated/wa_grpc_pb";
 import { startWaService, subscribe } from "./wa-service";
 import { MessageType } from "./types/constants";
 import { StreamResponse } from "./types/message-types";
+import { listenPicStream } from "./picture";
 
 // Load .env file
 dotenvx.config();
@@ -15,6 +16,9 @@ const client = new WhatsAppServiceClient(
   SERVER_ADDRESS,
   grpc.credentials.createInsecure()
 );
+
+// Stream for profile pic
+listenPicStream(client);
 
 // Open a stream
 const stream = client.subscribePresense();
