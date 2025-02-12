@@ -29,7 +29,10 @@ export const subscribe = async (jid: string, reconnect = false) => {
   }
 };
 
-export const startWaService = async (client: WhatsAppServiceClient) => {
+export const startWaService = async (
+  client: WhatsAppServiceClient,
+  reconnect = false
+) => {
   const { state, saveCreds } = await useMultiFileAuthState("./auth");
 
   sock = makeWASocket({
@@ -49,15 +52,17 @@ export const startWaService = async (client: WhatsAppServiceClient) => {
       console.log("Connection closed, reconnecting:", shouldReconect);
       // reconnect if not logged out
       if (shouldReconect) {
-        startWaService(client);
+        startWaService(client, true);
       }
     } else if (connection === "open") {
       console.log("opened connection");
 
       // After reconnecting we need to re-subscribe presence channel
-      subscribedList.forEach((jid) => {
-        subscribe(jid);
-      });
+      if (reconnect) {
+        subscribedList.forEach((jid) => {
+          subscribe(jid, reconnect);
+        });
+      }
     }
   });
 
