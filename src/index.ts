@@ -22,7 +22,7 @@ const stream = client.subscribePresense();
 // Listen for incoming messages from the server
 stream.on("data", (response) => {
   const streamResp = response.toObject() as StreamResponse;
-
+  console.log(streamResp);
   const mt = streamResp.mt;
 
   for (const jid of streamResp.jidList) {

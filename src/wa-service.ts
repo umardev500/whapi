@@ -12,13 +12,17 @@ import { parsePresence } from "./presence";
 let sock: WASocket | null = null;
 let subscribedList: string[] = [];
 
-export const subscribe = async (jid: string) => {
+export const subscribe = async (jid: string, reconnect = false) => {
   if (!sock) {
     console.log("no sock");
     return;
   }
 
-  console.log("subscribing to", jid);
+  const msg = reconnect
+    ? `✅ re-subscribing to ${jid}`
+    : `📩 subscribing to ${jid}`;
+
+  console.log(msg);
   if (!subscribedList.includes(jid)) {
     await sock.presenceSubscribe(jid);
     subscribedList.push(jid);
@@ -31,6 +35,7 @@ export const startWaService = async (client: WhatsAppServiceClient) => {
   sock = makeWASocket({
     auth: state,
     printQRInTerminal: true,
+    connectTimeoutMs: 10000,
   });
 
   sock.ev.on("creds.update", saveCreds);
@@ -48,6 +53,11 @@ export const startWaService = async (client: WhatsAppServiceClient) => {
       }
     } else if (connection === "open") {
       console.log("opened connection");
+
+      // After reconnecting we need to re-subscribe presence channel
+      subscribedList.forEach((jid) => {
+        subscribe(jid);
+      });
     }
   });
 

@@ -7,6 +7,7 @@ export const parsePresence = (
   id: string,
   presenceData: PresenceData
 ) => {
+  console.log("presence:", presenceData);
   if ("lastSeen" in presenceData) {
     const onlineUser = new SendOnlineUserRequest();
     onlineUser.setJid(id);
